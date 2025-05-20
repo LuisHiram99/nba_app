@@ -1,12 +1,20 @@
+<label>Id del Equipo:</label>
+<input type="number" name="IdEquipo" value="{{ equipo.id_equipo if equipo else '' }}"><br>
+
 <label>Nombre del Equipo:</label>
 <input type="text" name="NombreEquipo" value="{{ equipo.NombreEquipo if equipo else '' }}"><br>
+
 <label>Ciudad:</label>
 <input type="text" name="Ciudad" value="{{ equipo.Ciudad if equipo else '' }}"><br>
+
 <label>Estado:</label>
 <input type="text" name="Estado" value="{{ equipo.Estado if equipo else '' }}"><br>
+
 <label>Abreviación:</label>
 <input type="text" name="Abbrev" value="{{ equipo.Abbrev if equipo else '' }}"><br>
+
 <label>Conferencia:</label>
 <input type="text" name="Conferencia" value="{{ equipo.Conferencia if equipo else '' }}"><br>
+
 <label>Año Fundado:</label>
 <input type="number" name="AnioFundado" value="{{ equipo.AnioFundado if equipo else '' }}"><br>
