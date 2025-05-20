@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html>
+<head><title>Editar Equipo</title></head>
+<body>
+    <h1>Editar Equipo</h1>
+    <form method="POST">
+        {% include 'form.html' %}
+        <input type="submit" value="Actualizar">
+    </form>
+    <a href="{{ url_for('index') }}">Regresar</a>
+</body>
+</html>

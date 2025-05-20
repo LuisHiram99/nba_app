@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head><title>CRUD | NBA</title></head>
+<body>
+    <h1>Lista de Equipos</h1>
+    <a href="{{ url_for('create') }}">Agregar Equipo</a>
+    <ul>
+        {% for equipo in equipos %}
+            <li>
+                {{ equipo.NombreEquipo }} - {{ equipo.Ciudad }} - {{ equipo.Estado }} - 
+                {{ equipo.Abbrev }} - {{ equipo.Conferencia }} - {{ equipo.AnioFundado }}
+                <a href="{{ url_for('update', id=equipo.id_equipo) }}">Editar</a>
+                <a href="{{ url_for('delete', id=equipo.id_equipo) }}">Eliminar</a>
+            </li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
