@@ -8,7 +8,7 @@ db = SQLAlchemy(app)
 
 class Equipo(db.Model):
     __tablename__ = 'equipo'
-    id_equipo = db.Column(db.Integer, primary_key=True)
+    id_equipo = db.Column('id_equipo', db.Integer, primary_key=True)
     NombreEquipo = db.Column('nombreequipo', db.String(100), unique=True)
     Ciudad = db.Column('ciudad', db.String(100))
     Estado = db.Column('estado', db.String(100))
@@ -25,6 +25,7 @@ def index():
 def create():
     if request.method == 'POST':
         equipo = Equipo(
+            id_equipo=request.form['IdEquipo'],
             NombreEquipo=request.form['NombreEquipo'],
             Ciudad=request.form['Ciudad'],
             Estado=request.form['Estado'],
@@ -59,4 +60,4 @@ def delete(id):
     return redirect(url_for('index'))
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, host='0.0.0.0')
