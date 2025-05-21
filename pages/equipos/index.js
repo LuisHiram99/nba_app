@@ -1,0 +1,108 @@
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/router';
+
+export default function ListaEquipos() {
+    const [equipos, setEquipos] = useState([]);
+    const router = useRouter();
+
+    useEffect(() => {
+        fetch('http://localhost:5000/api/equipos')
+            .then(res => res.json())
+            .then(data => setEquipos(data));
+    }, []);
+
+    function eliminar(id) {
+        fetch(`http://localhost:5000/api/equipos/${id}`, {
+            method: 'DELETE'
+        }).then(() => {
+            setEquipos(equipos.filter(e => e.id_equipo !== id));
+        });
+    }
+
+    return (
+        <main style={styles.container}>
+            <h1 style={styles.title}>Lista de Equipos</h1>
+            <button onClick={() => router.push('/equipos/create')} style={styles.agregar}>Agregar Equipo</button>
+            <ul style={styles.list}>
+                {equipos.map(e => (
+                    <li key={e.id_equipo} style={styles.card}>
+                        <strong>{e.NombreEquipo}</strong> - {e.Ciudad}, {e.Estado} | {e.Abbrev} | {e.Conferencia} | {e.AnioFundado}
+                        <div style={styles.buttonGroup}>
+                            <button onClick={() => router.push(`/equipos/edit?id=${e.id_equipo}`)} style={styles.editar}>Editar</button>
+                            <button onClick={() => eliminar(e.id_equipo)} style={styles.eliminar}>Eliminar</button>
+                        </div>
+                    </li>
+                ))}
+            </ul>
+        </main>
+    );
+}
+
+const styles = {
+    container: {
+        background: 'linear-gradient(135deg, #0B1E3E 50%, #BF0A30 50%)',
+        minHeight: '100vh',
+        padding: '2rem',
+        color: 'white',
+        fontFamily: 'Arial, sans-serif',
+        textAlign: 'center',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center'
+    },
+    title: {
+        fontSize: '2.5rem',
+        marginBottom: '2rem',
+        borderBottom: '4px solid white',
+        paddingBottom: '0.5rem',
+        letterSpacing: '2px'
+    },
+    list: {
+        listStyle: 'none',
+        padding: 0,
+        maxWidth: '800px',
+        width: '100%'
+    },
+    card: {
+        backgroundColor: '#fff',
+        color: '#1D428A',
+        padding: '1rem',
+        marginBottom: '1rem',
+        borderRadius: '8px',
+        boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '0.5rem'
+    },
+    buttonGroup: {
+        display: 'flex',
+        justifyContent: 'center',
+        gap: '1rem'
+    },
+    agregar: {
+        backgroundColor: '#C8102E',
+        color: 'white',
+        border: 'none',
+        padding: '0.6rem 1.5rem',
+        borderRadius: '6px',
+        fontWeight: 'bold',
+        cursor: 'pointer',
+        marginBottom: '1.5rem'
+    },
+    editar: {
+        backgroundColor: '#1D428A',
+        color: 'white',
+        border: 'none',
+        padding: '0.4rem 1rem',
+        borderRadius: '5px',
+        cursor: 'pointer'
+    },
+    eliminar: {
+        backgroundColor: 'gray',
+        color: 'white',
+        border: 'none',
+        padding: '0.4rem 1rem',
+        borderRadius: '5px',
+        cursor: 'pointer'
+    }
+};
