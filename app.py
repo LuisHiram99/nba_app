@@ -3,7 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, resources={r"/api/*": {"origins": "http://localhost:3000"}})
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:12345@localhost/nba_db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -21,64 +21,35 @@ class Equipo(db.Model):
 
 class Jugador(db.Model):
     __tablename__ = 'jugador'
-    id_jugador = db.Column(db.Integer, primary_key=True)
-    NombreJugador = db.Column(db.String(100))
-    ApellidoJugador = db.Column(db.String(100))
-    Altura_cm = db.Column(db.Integer)
-    TEAM_ID = db.Column(db.Integer)
-    TEAM_ABBREVIATION = db.Column(db.String(10))
-    SEASON_ID = db.Column(db.String(20))
+    id_jugador = db.Column('id_jugador', db.Integer, primary_key=True)
+    NombreJugador = db.Column('nombrejugador', db.String(100))  # aquí el cambio
+    ApellidoJugador = db.Column('apellidojugador', db.String(100))  # aquí también
+    Altura_cm = db.Column('altura_cm', db.Integer)  # y aquí
 
-class Jugador_22_23(db.Model):
-    __tablename__ = 'jugador_22_23'
-    id_jugador = db.Column(db.Integer, primary_key=True)
-    NombreJugador = db.Column(db.String(100))
-    ApellidoJugador = db.Column(db.String(100))
-    Altura_cm = db.Column(db.Integer)
-    TEAM_ID = db.Column(db.Integer)
-    TEAM_ABBREVIATION = db.Column(db.String(10))
-    SEASON_ID = db.Column(db.String(20))
+class EstadisticasEquipo(db.Model):
+    __tablename__ = 'estadisticasequipo'
+    
+    id_equipo = db.Column('equipo', db.Integer, primary_key=True)
+    NombreTemporada = db.Column('nombretemporada', db.String(100), primary_key=True)
+    
+    TotalJuegos = db.Column('totaljuegos', db.Integer)
+    Ganados = db.Column('ganados', db.Integer)
+    Perdidos = db.Column('perdidos', db.Integer)
+    PlayOffGanados = db.Column('playoffganados', db.Integer)
+    PlayoffPerdidos = db.Column('playoffperdidos', db.Integer)
+    Finales = db.Column('finales', db.Boolean)
 
-class Estadisticas_21_22(db.Model):
-    __tablename__ = 'estadisticas_21_22'
-    PERSON_ID = db.Column(db.Integer, primary_key=True)
-    NOMBRE = db.Column(db.String(100))
-    APELLIDO = db.Column(db.String(100))
-    TEAM_ID = db.Column(db.Integer)
-    TEAM_ABBREVIATION = db.Column(db.String(10))
-    ALTURA_CM = db.Column(db.Integer)
-    SEASON_ID = db.Column(db.String(20))
-    GP = db.Column(db.Integer)
-    PTS = db.Column(db.Float)
-    AST = db.Column(db.Float)
-    REB = db.Column(db.Float)
-    BLK = db.Column(db.Float)
-    MIN = db.Column(db.Float)
-    FG_PCT = db.Column(db.Float)
-    FG3_PCT = db.Column(db.Float)
-    FT_PCT = db.Column(db.Float)
-
-class Estadisticas_22_23(db.Model):
-    __tablename__ = 'estadisticas_22_23'
-    PERSON_ID = db.Column(db.Integer, primary_key=True)
-    NOMBRE = db.Column(db.String(100))
-    APELLIDO = db.Column(db.String(100))
-    TEAM_ID = db.Column(db.Integer)
-    TEAM_ABBREVIATION = db.Column(db.String(10))
-    ALTURA_CM = db.Column(db.Integer)
-    SEASON_ID = db.Column(db.String(20))
-    GP = db.Column(db.Integer)
-    PTS = db.Column(db.Float)
-    AST = db.Column(db.Float)
-    REB = db.Column(db.Float)
-    BLK = db.Column(db.Float)
-    MIN = db.Column(db.Float)
-    FG_PCT = db.Column(db.Float)
-    FG3_PCT = db.Column(db.Float)
-    FT_PCT = db.Column(db.Float)
-
-
-
+class EstadisticasJugador(db.Model):
+    __tablename__ = 'estadisticasjugador'
+    
+    id_jugador = db.Column('id_jugador', db.Integer, primary_key=True)
+    NombreTemporada = db.Column('nombretemporada', db.String(100), primary_key=True)
+    
+    TotalJuegos = db.Column('totaljuegos', db.Integer)
+    Puntos = db.Column('puntos', db.Integer)
+    Asistencias = db.Column('asistencias', db.Integer)
+    Rebotes = db.Column('rebotes', db.Integer)
+    Bloqueos = db.Column('bloqueos', db.Integer)
 
 
 
@@ -144,6 +115,9 @@ def get_equipos():
         } for e in equipos
     ])
 
+# ----------- Jugadores -----------
+
+#Jalar info
 @app.route('/api/jugadores', methods=['GET'])
 def get_jugadores():
     jugadores = Jugador.query.all()
@@ -153,74 +127,179 @@ def get_jugadores():
             'NombreJugador': j.NombreJugador,
             'ApellidoJugador': j.ApellidoJugador,
             'Altura_cm': j.Altura_cm,
-            'TEAM_ID': j.TEAM_ID,
-            'TEAM_ABBREVIATION': j.TEAM_ABBREVIATION,
-            'SEASON_ID': j.SEASON_ID
         } for j in jugadores
     ])
 
-@app.route('/api/jugadores/22_23', methods=['GET'])
-def get_jugadores_22_23():
-    jugadores = Jugador_22_23.query.all()
+# Crear info
+@app.route('/api/jugadores', methods=['POST'])
+def crear_jugador():
+    data = request.get_json()
+    nuevo_jugador = Jugador(
+        id_jugador=data['id_jugador'],
+        NombreJugador=data['NombreJugador'],
+        ApellidoJugador=data['ApellidoJugador'],
+        Altura_cm=data['Altura_cm']
+    )
+    db.session.add(nuevo_jugador)
+    db.session.commit()
+    return jsonify({'mensaje': 'Jugador creado'}), 201
+
+# Eliminar info
+@app.route('/api/jugadores/<int:id>', methods=['DELETE'])
+def eliminar_jugador(id):
+    jugador = Jugador.query.get(id)
+    if not jugador:
+        return jsonify({'error': 'Jugador no encontrado'}), 404
+    db.session.delete(jugador)
+    db.session.commit()
+    return jsonify({'mensaje': 'Jugador eliminado'}), 200
+
+# Actualizar info
+@app.route('/api/jugadores/<int:id>', methods=['PUT'])
+def actualizar_jugador(id):
+    jugador = Jugador.query.get(id)
+    if not jugador:
+        return jsonify({'error': 'Jugador no encontrado'}), 404
+    data = request.get_json()
+    jugador.NombreJugador = data['NombreJugador']
+    jugador.ApellidoJugador = data['ApellidoJugador']
+    jugador.Altura_cm = data['Altura_cm']
+    db.session.commit()
+    return jsonify({'mensaje': 'Jugador actualizado'})
+
+#------------- Estadisticas Jugadores -------------
+# Obtener info
+@app.route('/api/estadisticasJugador', methods=['GET'])
+def get_estadisticas_jugadores():
+    estadisticas = EstadisticasJugador.query.all()
     return jsonify([
         {
-            'id_jugador': j.id_jugador,
-            'NombreJugador': j.NombreJugador,
-            'ApellidoJugador': j.ApellidoJugador,
-            'Altura_cm': j.Altura_cm,
-            'TEAM_ID': j.TEAM_ID,
-            'TEAM_ABBREVIATION': j.TEAM_ABBREVIATION,
-            'SEASON_ID': j.SEASON_ID
-        } for j in jugadores
+            'id_jugador': e.id_jugador,
+            'NombreTemporada': e.NombreTemporada,
+            'TotalJuegos': e.TotalJuegos,
+            'Puntos': e.Puntos,
+            'Asistencias': e.Asistencias,
+            'Rebotes': e.Rebotes,
+            'Bloqueos': e.Bloqueos,
+        } for e in estadisticas
+    ])
+# Crear info
+@app.route('/api/estadisticasJugador', methods=['POST'])
+def crear_estadisticas_jugador():
+    data = request.get_json()
+    nuevo_estadisticas = EstadisticasJugador(
+        id_jugador=data['id_jugador'],
+        NombreTemporada=data['NombreTemporada'],
+        TotalJuegos=data['TotalJuegos'],
+        Puntos=data['Puntos'],
+        Asistencias=data['Asistencias'],
+        Rebotes=data['Rebotes'],
+        Bloqueos=data['Bloqueos']
+    )
+    db.session.add(nuevo_estadisticas)
+    db.session.commit()
+    return jsonify({'mensaje': 'Estadísticas creadas'}), 201
+
+# Actualizar info
+@app.route('/api/estadisticasJugador/<int:id_jugador>/<string:nombre_temporada>', methods=['PUT'])
+def actualizar_estadistica_jugador(id_jugador, nombre_temporada):
+    data = request.get_json()
+    estadistica = EstadisticasJugador.query.get((id_jugador, nombre_temporada))
+    if not estadistica:
+        return jsonify({'mensaje': 'Estadística no encontrada'}), 404
+
+    estadistica.TotalJuegos = int(data['TotalJuegos'])
+    estadistica.Puntos = int(data['Puntos'])
+    estadistica.Asistencias = int(data['Asistencias'])
+    estadistica.Rebotes = int(data['Rebotes'])
+    estadistica.Bloqueos = int(data['Bloqueos'])
+
+    db.session.commit()
+    return jsonify({'mensaje': 'Estadística actualizada'}), 200
+
+# Eliminar info
+
+@app.route('/api/estadisticasJugador/<int:id_jugador>/<string:nombre_temporada>', methods=['DELETE'])
+def eliminar_estadistica_jugador(id_jugador, nombre_temporada):
+    estadistica = EstadisticasJugador.query.get((id_jugador, nombre_temporada))
+    if not estadistica:
+        return jsonify({'mensaje': 'Estadística no encontrada'}), 404
+
+    db.session.delete(estadistica)
+    db.session.commit()
+    return jsonify({'mensaje': 'Estadística eliminada'}), 200
+
+
+# -----------------------Estadisticas Equipos-----------------------------
+
+# Obtener info
+@app.route('/api/estadisticasEquipo', methods=['GET'])
+def get_estadisticas_equipo():
+    estadisticas = EstadisticasEquipo.query.all()
+    return jsonify([
+        {
+            'id_equipo': e.id_equipo,
+            'NombreTemporada': e.NombreTemporada,
+            'TotalJuegos': e.TotalJuegos,
+            'Ganados': e.Ganados,
+            'Perdidos': e.Perdidos,
+            'PlayOffGanados': e.PlayOffGanados,
+            'PlayoffPerdidos': e.PlayoffPerdidos,
+            'Finales': e.Finales
+        } for e in estadisticas
     ])
 
-@app.route('/api/estadisticas/21_22', methods=['GET'])
-def get_estadisticas_21_22():
-    jugadores = Estadisticas_21_22.query.all()
-    return jsonify([
-        {
-            'PERSON_ID': j.PERSON_ID,
-            'NOMBRE': j.NOMBRE,
-            'APELLIDO': j.APELLIDO,
-            'TEAM_ID': j.TEAM_ID,
-            'TEAM_ABBREVIATION': j.TEAM_ABBREVIATION,
-            'ALTURA_CM': j.ALTURA_CM,
-            'SEASON_ID': j.SEASON_ID,
-            'GP': j.GP,
-            'PTS': j.PTS,
-            'AST': j.AST,
-            'REB': j.REB,
-            'BLK': j.BLK,
-            'MIN': j.MIN,
-            'FG_PCT': j.FG_PCT,
-            'FG3_PCT': j.FG3_PCT,
-            'FT_PCT': j.FT_PCT
-        } for j in jugadores
-    ])
 
-@app.route('/api/estadisticas/22_23', methods=['GET'])
-def get_estadisticas_22_23():
-    jugadores = Estadisticas_22_23.query.all()
-    return jsonify([
-        {
-            'PERSON_ID': j.PERSON_ID,
-            'NOMBRE': j.NOMBRE,
-            'APELLIDO': j.APELLIDO,
-            'TEAM_ID': j.TEAM_ID,
-            'TEAM_ABBREVIATION': j.TEAM_ABBREVIATION,
-            'ALTURA_CM': j.ALTURA_CM,
-            'SEASON_ID': j.SEASON_ID,
-            'GP': j.GP,
-            'PTS': j.PTS,
-            'AST': j.AST,
-            'REB': j.REB,
-            'BLK': j.BLK,
-            'MIN': j.MIN,
-            'FG_PCT': j.FG_PCT,
-            'FG3_PCT': j.FG3_PCT,
-            'FT_PCT': j.FT_PCT
-        } for j in jugadores
-    ])
+# Crear info
+@app.route('/api/estadisticasEquipo', methods=['POST'])
+def crear_estadisticas_equipo():
+    data = request.get_json()
+    nuevo_estadisticas = EstadisticasEquipo(
+        id_equipo=data['id_equipo'],
+        NombreTemporada=data['NombreTemporada'],
+        TotalJuegos=data['TotalJuegos'],
+        Ganados=data['Ganados'],
+        Perdidos=data['Perdidos'],
+        PlayOffGanados=data['PlayOffGanados'],
+        PlayoffPerdidos=data['PlayoffPerdidos'],
+        Finales=bool(int(data['Finales']))
+    )
+    db.session.add(nuevo_estadisticas)
+    db.session.commit()
+    return jsonify({'mensaje': 'Estadísticas de equipo creadas'}), 201
+# Actualizar info
+@app.route('/api/estadisticasEquipo/<int:id_equipo>/<string:nombre_temporada>', methods=['PUT'])
+def actualizar_estadistica_equipo(id_equipo, nombre_temporada):
+    data = request.get_json()
+    estadistica = EstadisticasEquipo.query.get((id_equipo, nombre_temporada))
+    if not estadistica:
+        return jsonify({'mensaje': 'Estadística no encontrada'}), 404
+
+    estadistica.TotalJuegos = int(data['TotalJuegos'])
+    estadistica.Ganados = int(data['Ganados'])
+    estadistica.Perdidos = int(data['Perdidos'])
+    estadistica.PlayOffGanados = int(data['PlayOffGanados'])
+    estadistica.PlayoffPerdidos = int(data['PlayoffPerdidos'])
+    estadistica.Finales = bool(int(data['Finales']))
+
+    db.session.commit()
+    return jsonify({'mensaje': 'Estadística de equipo actualizada'}), 200
+
+
+# Eliminar info
+@app.route('/api/estadisticasEquipo/<int:id_equipo>/<string:nombre_temporada>', methods=['DELETE'])
+def eliminar_estadistica_equipo(id_equipo, nombre_temporada):
+    estadistica = EstadisticasEquipo.query.get((id_equipo, nombre_temporada))
+    if not estadistica:
+        return jsonify({'mensaje': 'Estadística no encontrada'}), 404
+
+    db.session.delete(estadistica)
+    db.session.commit()
+    return jsonify({'mensaje': 'Estadística de equipo eliminada'}), 200
+
+
+# ----------------------------------------------------
+
 
 
 

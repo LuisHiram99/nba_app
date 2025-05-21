@@ -4,20 +4,21 @@ export default function Home() {
     const router = useRouter();
 
     return (
-        <main style={styles.container}>
+        <main style={styles.container_nav}>
             <nav style={styles.navbar}>
                 <button style={styles.navButton} onClick={() => router.push('/jugadores')}>Jugadores</button>
                 <button style={styles.navButton} onClick={() => router.push('/estadisticas')}>Estadísticas jugadores</button>
                 <button style={styles.navButton} onClick={() => router.push('/equipos')}>Equipos</button>
+                <button style={styles.navButton} onClick={() => router.push('/estadisticas_equipo')}>Estadísticas equipos</button>
             </nav>
 
-            <h1 style={styles.title}>NBA</h1>
+            <h1 style={styles.title_nav}>NBA</h1>
         </main>
     );
 }
 
 const styles = {
-    container: {
+    container_nav: {
         background: 'linear-gradient(135deg, #0B1E3E 50%, #BF0A30 50%)',
         color: 'white',
         height: '100vh',
@@ -30,7 +31,7 @@ const styles = {
         textAlign: 'center',
         position: 'relative'
     },
-    title: {
+    title_nav: {
         fontSize: '3rem',
         marginBottom: '2rem',
         borderBottom: '4px solid white',

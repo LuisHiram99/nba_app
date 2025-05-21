@@ -1,46 +1,56 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 
-export default function EstadisticasJugadores() {
+export default function EstadisticasEquipo() {
     const [estadisticas, setEstadisticas] = useState([]);
-    const [jugadores, setJugadores] = useState([]);
+    const [equipos, setEquipos] = useState([]);
     const [busqueda, setBusqueda] = useState('');
     const router = useRouter();
 
     useEffect(() => {
-        fetch('http://localhost:5000/api/estadisticasJugador')
+        fetch('http://localhost:5000/api/estadisticasEquipo')
             .then(res => res.json())
             .then(data => setEstadisticas(data));
 
-        fetch('http://localhost:5000/api/jugadores')
+        fetch('http://localhost:5000/api/equipos')
             .then(res => res.json())
-            .then(data => setJugadores(data));
+            .then(data => setEquipos(data));
     }, []);
 
-    const eliminar = (id_jugador, temporada) => {
-        fetch(`http://localhost:5000/api/estadisticasJugador/${id_jugador}/${temporada}`, {
+    const eliminar = (id_equipo, temporada) => {
+        if (!confirm(`¿Seguro que quieres eliminar la estadística de la temporada ${temporada}?`)) return;
+
+        fetch(`http://localhost:5000/api/estadisticasEquipo/${id_equipo}/${temporada}`, {
             method: 'DELETE'
-        }).then(() => {
-            setEstadisticas(estadisticas.filter(j =>
-                !(j.id_jugador === id_jugador && j.NombreTemporada === temporada)
+        })
+        .then(res => {
+            if (!res.ok) {
+                alert('Error al eliminar la estadística');
+                return;
+            }
+            setEstadisticas(estadisticas.filter(e =>
+                !(e.id_equipo === id_equipo && e.NombreTemporada === temporada)
             ));
+        })
+        .catch(() => {
+            alert('Error de conexión al eliminar');
         });
     };
 
-    const obtenerNombreJugador = (id) => {
-        const jugador = jugadores.find(j => j.id_jugador === id);
-        return jugador ? `${jugador.NombreJugador} ${jugador.ApellidoJugador}` : 'Jugador desconocido';
+    const obtenerNombreEquipo = (id) => {
+        const equipo = equipos.find(e => e.id_equipo === id);
+        return equipo ? equipo.NombreEquipo : 'Equipo desconocido';
     };
 
-    const estadisticasFiltradas = estadisticas.filter(j => {
-        const jugador = jugadores.find(p => p.id_jugador === j.id_jugador);
-        if (!jugador) return false;
-        const nombreCompleto = `${jugador.NombreJugador} ${jugador.ApellidoJugador}`.toLowerCase();
-        return nombreCompleto.includes(busqueda.toLowerCase());
+    const estadisticasFiltradas = estadisticas.filter(e => {
+        const equipo = equipos.find(eq => eq.id_equipo === e.id_equipo);
+        if (!equipo) return false;
+        return equipo.NombreEquipo.toLowerCase().includes(busqueda.toLowerCase());
     });
 
     return (
         <main style={styles.container}>
+
             <nav style={styles.navbar}>
                 <button style={styles.navButton} onClick={() => router.push('/jugadores')}>Jugadores</button>
                 <button style={styles.navButton} onClick={() => router.push('/estadisticas')}>Estadísticas jugadores</button>
@@ -48,34 +58,35 @@ export default function EstadisticasJugadores() {
                 <button style={styles.navButton} onClick={() => router.push('/estadisticas_equipo')}>Estadísticas equipos</button>
             </nav>
 
-            <h1 style={styles.title}>Estadísticas de Jugadores NBA</h1>
+            <h1 style={styles.title}>Estadísticas de Equipos NBA</h1>
 
             <input
                 type="text"
-                placeholder="Buscar jugador..."
+                placeholder="Buscar equipo..."
                 value={busqueda}
                 onChange={(e) => setBusqueda(e.target.value)}
                 style={styles.input}
             />
 
-            <button onClick={() => router.push('/estadisticas/create')} style={styles.agregar}>
+            <button onClick={() => router.push('/estadisticas_equipo/create')} style={styles.agregar}>
                 Agregar Estadística
             </button>
 
             <ul style={styles.list}>
-                {estadisticasFiltradas.map(j => (
-                    <li key={j.id_jugador + j.NombreTemporada} style={styles.card}>
-                        <strong>{obtenerNombreJugador(j.id_jugador)}</strong><br />
-                        Temporada: {j.NombreTemporada}<br />
-                        GP: {j.TotalJuegos}, PTS: {j.Puntos}, AST: {j.Asistencias}, REB: {j.Rebotes}, BLK: {j.Bloqueos}
+                {estadisticasFiltradas.map(e => (
+                    <li key={e.id_equipo + e.NombreTemporada} style={styles.card}>
+                        <strong>{obtenerNombreEquipo(e.id_equipo)}</strong><br />
+                        Temporada: {e.NombreTemporada}<br />
+                        GP: {e.TotalJuegos}, Ganados: {e.Ganados}, Perdidos: {e.Perdidos}<br />
+                        Playoffs Ganados: {e.PlayOffGanados}, Playoffs Perdidos: {e.PlayoffPerdidos}, Finales: {e.Finales ? 'Sí' : 'No'}
                         <div style={styles.buttonGroup}>
                             <button
-                                onClick={() => router.push(`/estadisticas/edit?id=${j.id_jugador}&temporada=${j.NombreTemporada}`)}
+                                onClick={() => router.push(`/estadisticas_equipo/edit?id_equipo=${e.id_equipo}&nombre_temporada=${e.NombreTemporada}`)}
                                 style={styles.editar}>
                                 Editar
                             </button>
                             <button
-                                onClick={() => eliminar(j.id_jugador, j.NombreTemporada)}
+                                onClick={() => eliminar(e.id_equipo, e.NombreTemporada)}
                                 style={styles.eliminar}>
                                 Eliminar
                             </button>
@@ -88,6 +99,7 @@ export default function EstadisticasJugadores() {
 }
 
 const styles = {
+    // ... (igual que tu código original)
     container: {
         background: 'linear-gradient(135deg, #0B1E3E 50%, #BF0A30 50%)',
         minHeight: '100vh',
@@ -98,13 +110,6 @@ const styles = {
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center'
-    },
-    title: {
-        fontSize: '2.5rem',
-        marginBottom: '1.5rem',
-        borderBottom: '4px solid white',
-        paddingBottom: '0.5rem',
-        letterSpacing: '2px'
     },
     input: {
         width: '320px',
@@ -164,27 +169,6 @@ const styles = {
         borderRadius: '5px',
         cursor: 'pointer'
     },
-    container_nav: {
-        background: 'linear-gradient(135deg, #0B1E3E 50%, #BF0A30 50%)',
-        color: 'white',
-        height: '100vh',
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'center',
-        alignItems: 'center',
-        fontFamily: 'Arial, sans-serif',
-        padding: '2rem',
-        textAlign: 'center',
-        position: 'relative'
-    },
-    title: {
-        marginTop: '2.5rem',
-        fontSize: '3rem',
-        marginBottom: '2rem',
-        borderBottom: '4px solid white',
-        paddingBottom: '0.5rem',
-        letterSpacing: '2px'
-    },
     navbar: {
         position: 'absolute',
         top: 0,
@@ -207,5 +191,13 @@ const styles = {
         fontWeight: 'bold',
         fontSize: '1rem',
         transition: 'background-color 0.3s ease'
-    }
+    },
+    title: {
+        marginTop: '2.5rem',
+        fontSize: '3rem',
+        marginBottom: '2rem',
+        borderBottom: '4px solid white',
+        paddingBottom: '0.5rem',
+        letterSpacing: '2px'
+    },
 };
