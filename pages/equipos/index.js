@@ -3,6 +3,7 @@ import { useRouter } from 'next/router';
 
 export default function ListaEquipos() {
     const [equipos, setEquipos] = useState([]);
+    const [busqueda, setBusqueda] = useState('');
     const router = useRouter();
 
     useEffect(() => {
@@ -19,12 +20,28 @@ export default function ListaEquipos() {
         });
     }
 
+    const equiposFiltrados = equipos.filter(e =>
+        e.NombreEquipo.toLowerCase().includes(busqueda.toLowerCase())
+    );
+
     return (
         <main style={styles.container}>
             <h1 style={styles.title}>Lista de Equipos</h1>
-            <button onClick={() => router.push('/equipos/create')} style={styles.agregar}>Agregar Equipo</button>
+
+            <input
+                type="text"
+                placeholder="Buscar por nombre..."
+                value={busqueda}
+                onChange={(e) => setBusqueda(e.target.value)}
+                style={styles.input}
+            />
+
+            <button onClick={() => router.push('/equipos/create')} style={styles.agregar}>
+                Agregar Equipo
+            </button>
+
             <ul style={styles.list}>
-                {equipos.map(e => (
+                {equiposFiltrados.map(e => (
                     <li key={e.id_equipo} style={styles.card}>
                         <strong>{e.NombreEquipo}</strong> - {e.Ciudad}, {e.Estado} | {e.Abbrev} | {e.Conferencia} | {e.AnioFundado}
                         <div style={styles.buttonGroup}>
@@ -52,10 +69,20 @@ const styles = {
     },
     title: {
         fontSize: '2.5rem',
-        marginBottom: '2rem',
+        marginBottom: '1.5rem',
         borderBottom: '4px solid white',
         paddingBottom: '0.5rem',
         letterSpacing: '2px'
+    },
+    input: {
+        width: '320px',
+        padding: '0.6rem',
+        fontSize: '1rem',
+        borderRadius: '8px',
+        border: 'none',
+        outline: 'none',
+        boxShadow: '0 0 6px rgba(0,0,0,0.3)',
+        marginBottom: '1.5rem'
     },
     list: {
         listStyle: 'none',
