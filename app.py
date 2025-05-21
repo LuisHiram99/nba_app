@@ -19,6 +19,71 @@ class Equipo(db.Model):
     Conferencia = db.Column('conferencia', db.String(5))
     AnioFundado = db.Column('aniofundado', db.Integer)
 
+class Jugador(db.Model):
+    __tablename__ = 'jugador'
+    id_jugador = db.Column(db.Integer, primary_key=True)
+    NombreJugador = db.Column(db.String(100))
+    ApellidoJugador = db.Column(db.String(100))
+    Altura_cm = db.Column(db.Integer)
+    TEAM_ID = db.Column(db.Integer)
+    TEAM_ABBREVIATION = db.Column(db.String(10))
+    SEASON_ID = db.Column(db.String(20))
+
+class Jugador_22_23(db.Model):
+    __tablename__ = 'jugador_22_23'
+    id_jugador = db.Column(db.Integer, primary_key=True)
+    NombreJugador = db.Column(db.String(100))
+    ApellidoJugador = db.Column(db.String(100))
+    Altura_cm = db.Column(db.Integer)
+    TEAM_ID = db.Column(db.Integer)
+    TEAM_ABBREVIATION = db.Column(db.String(10))
+    SEASON_ID = db.Column(db.String(20))
+
+class Estadisticas_21_22(db.Model):
+    __tablename__ = 'estadisticas_21_22'
+    PERSON_ID = db.Column(db.Integer, primary_key=True)
+    NOMBRE = db.Column(db.String(100))
+    APELLIDO = db.Column(db.String(100))
+    TEAM_ID = db.Column(db.Integer)
+    TEAM_ABBREVIATION = db.Column(db.String(10))
+    ALTURA_CM = db.Column(db.Integer)
+    SEASON_ID = db.Column(db.String(20))
+    GP = db.Column(db.Integer)
+    PTS = db.Column(db.Float)
+    AST = db.Column(db.Float)
+    REB = db.Column(db.Float)
+    BLK = db.Column(db.Float)
+    MIN = db.Column(db.Float)
+    FG_PCT = db.Column(db.Float)
+    FG3_PCT = db.Column(db.Float)
+    FT_PCT = db.Column(db.Float)
+
+class Estadisticas_22_23(db.Model):
+    __tablename__ = 'estadisticas_22_23'
+    PERSON_ID = db.Column(db.Integer, primary_key=True)
+    NOMBRE = db.Column(db.String(100))
+    APELLIDO = db.Column(db.String(100))
+    TEAM_ID = db.Column(db.Integer)
+    TEAM_ABBREVIATION = db.Column(db.String(10))
+    ALTURA_CM = db.Column(db.Integer)
+    SEASON_ID = db.Column(db.String(20))
+    GP = db.Column(db.Integer)
+    PTS = db.Column(db.Float)
+    AST = db.Column(db.Float)
+    REB = db.Column(db.Float)
+    BLK = db.Column(db.Float)
+    MIN = db.Column(db.Float)
+    FG_PCT = db.Column(db.Float)
+    FG3_PCT = db.Column(db.Float)
+    FT_PCT = db.Column(db.Float)
+
+
+
+
+
+
+# ======================== Vistas Web ========================
+
 @app.route('/')
 def index():
     equipos = Equipo.query.all()
@@ -62,7 +127,7 @@ def delete(id):
     db.session.commit()
     return redirect(url_for('index'))
 
-# ======================== API para conectar el frontend ========================
+# ======================== API para frontend ========================
 
 @app.route('/api/equipos', methods=['GET'])
 def get_equipos():
@@ -78,6 +143,86 @@ def get_equipos():
             'AnioFundado': e.AnioFundado
         } for e in equipos
     ])
+
+@app.route('/api/jugadores', methods=['GET'])
+def get_jugadores():
+    jugadores = Jugador.query.all()
+    return jsonify([
+        {
+            'id_jugador': j.id_jugador,
+            'NombreJugador': j.NombreJugador,
+            'ApellidoJugador': j.ApellidoJugador,
+            'Altura_cm': j.Altura_cm,
+            'TEAM_ID': j.TEAM_ID,
+            'TEAM_ABBREVIATION': j.TEAM_ABBREVIATION,
+            'SEASON_ID': j.SEASON_ID
+        } for j in jugadores
+    ])
+
+@app.route('/api/jugadores/22_23', methods=['GET'])
+def get_jugadores_22_23():
+    jugadores = Jugador_22_23.query.all()
+    return jsonify([
+        {
+            'id_jugador': j.id_jugador,
+            'NombreJugador': j.NombreJugador,
+            'ApellidoJugador': j.ApellidoJugador,
+            'Altura_cm': j.Altura_cm,
+            'TEAM_ID': j.TEAM_ID,
+            'TEAM_ABBREVIATION': j.TEAM_ABBREVIATION,
+            'SEASON_ID': j.SEASON_ID
+        } for j in jugadores
+    ])
+
+@app.route('/api/estadisticas/21_22', methods=['GET'])
+def get_estadisticas_21_22():
+    jugadores = Estadisticas_21_22.query.all()
+    return jsonify([
+        {
+            'PERSON_ID': j.PERSON_ID,
+            'NOMBRE': j.NOMBRE,
+            'APELLIDO': j.APELLIDO,
+            'TEAM_ID': j.TEAM_ID,
+            'TEAM_ABBREVIATION': j.TEAM_ABBREVIATION,
+            'ALTURA_CM': j.ALTURA_CM,
+            'SEASON_ID': j.SEASON_ID,
+            'GP': j.GP,
+            'PTS': j.PTS,
+            'AST': j.AST,
+            'REB': j.REB,
+            'BLK': j.BLK,
+            'MIN': j.MIN,
+            'FG_PCT': j.FG_PCT,
+            'FG3_PCT': j.FG3_PCT,
+            'FT_PCT': j.FT_PCT
+        } for j in jugadores
+    ])
+
+@app.route('/api/estadisticas/22_23', methods=['GET'])
+def get_estadisticas_22_23():
+    jugadores = Estadisticas_22_23.query.all()
+    return jsonify([
+        {
+            'PERSON_ID': j.PERSON_ID,
+            'NOMBRE': j.NOMBRE,
+            'APELLIDO': j.APELLIDO,
+            'TEAM_ID': j.TEAM_ID,
+            'TEAM_ABBREVIATION': j.TEAM_ABBREVIATION,
+            'ALTURA_CM': j.ALTURA_CM,
+            'SEASON_ID': j.SEASON_ID,
+            'GP': j.GP,
+            'PTS': j.PTS,
+            'AST': j.AST,
+            'REB': j.REB,
+            'BLK': j.BLK,
+            'MIN': j.MIN,
+            'FG_PCT': j.FG_PCT,
+            'FG3_PCT': j.FG3_PCT,
+            'FT_PCT': j.FT_PCT
+        } for j in jugadores
+    ])
+
+
 
 @app.route('/api/equipos', methods=['POST'])
 def crear_equipo():
